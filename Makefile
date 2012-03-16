@@ -1,6 +1,6 @@
 PATH=/usr/bin:/bin:/opt/cross/bin/:/usr/local/bin:/usr/vac/bin:/usr/vacpp/bin
 CC=gcc -Wall -g
-AIX_CC=gxlc -g -DAIX
+AIX_CC=gxlc -g
 AIX_STRIP=strip
 STRIP=strip -s
 WIN_GCC=i386-mingw32msvc-gcc -Wall -g

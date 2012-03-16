@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <stdlib.h>
-#ifndef AIX
+#ifndef _AIX
  #include <getopt.h>
 #endif
 #include <string.h>

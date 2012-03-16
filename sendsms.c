@@ -2,22 +2,24 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include <getopt.h>
+#ifndef AIX
+ #include <getopt.h>
+#endif
 #include <string.h>
 #include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #ifndef MINGW32
-#include <netdb.h>
-#include <sys/socket.h>
-#include <sys/select.h>
+ #include <netdb.h>
+ #include <sys/socket.h>
+ #include <sys/select.h>
 #else
-#include <windows.h>
-#define O_BLOCK 0
-#define O_NONBLOCK FIONBIO
-#define F_GETFL 3
-#define F_SETFL 4
-#define EINPROGRESS 115
+ #include <windows.h>
+ #define O_BLOCK 0
+ #define O_NONBLOCK FIONBIO
+ #define F_GETFL 3
+ #define F_SETFL 4
+ #define EINPROGRESS 115
 #endif
 
 void

@@ -1,5 +1,7 @@
-PATH=/usr/bin:/bin:/opt/cross/bin/:/usr/local/bin
+PATH=/usr/bin:/bin:/opt/cross/bin/:/usr/local/bin:/usr/vac/bin:/usr/vacpp/bin
 CC=gcc -Wall -g
+AIX_CC=gxlc -g -DAIX
+AIX_STRIP=strip
 STRIP=strip -s
 WIN_GCC=i386-mingw32msvc-gcc -Wall -g
 WIN_STRIP=i386-mingw32msvc-strip -s
@@ -9,8 +11,12 @@ SOURCE=sendsms.c
 WINLIBS=-lwsock32
 WINICLUDES=
 LIBS= 
-all: lin win
+all: clean lin
 
+aix:
+	${AIX_CC} -c ${SOURCE} -o ${OBJECT}
+	${AIX_CC} -o ${TARGET} ${OBJECT}
+	${AIX_STRIP} ${TARGET}
 lin: 
 	${CC} -c ${SOURCE} -o ${OBJECT}
 	${CC} ${LIBS} -o ${TARGET} ${OBJECT}

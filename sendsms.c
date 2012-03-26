@@ -19,7 +19,6 @@
  #define O_NONBLOCK FIONBIO
  #define F_GETFL 3
  #define F_SETFL 4
- #define EINPROGRESS 115
 #endif
 
 void
@@ -61,23 +60,26 @@ replace (char *string, char *oldpiece, char *newpiece)
       newstr_index += new_len;
       str_index += old_len;
       if ((c = (char *) strstr (string + str_index, oldpiece)) != NULL)
-	oldpiece_index = c - string;
+        oldpiece_index = c - string;
     }
   strcpy (newstring + newstr_index, string + str_index);
 
   return newstring;
 }
 
-
-
-int sendsms (struct hostent *host, char *gsmnumber, char *gsmtext, int checksent, int port)
+int
+sendsms (struct hostent *host, char *gsmnumber, char *gsmtext, int checksent,
+         int port)
 {
   const char urlconfirm[] =
-    "GET /sendsms.php?sent=cli&to=%s&fromform=true&confirmation=on&text=%s HTTP/1.0\r\n\r\n";
+    "GET /sendsms.php?sent=cli&to=%s&fromform=true&confirmation=on&text=%s HTTP/1.1\r\n"
+    "Host:%s\r\n" "Connection: close\r\n\r\n";
   const char urlnoconfirm[] =
-    "GET /sendsms.php?sent=cli&to=%s&fromform=true&text=%s HTTP/1.0\r\n\r\n";
+    "GET /sendsms.php?sent=cli&to=%s&fromform=true&text=%s HTTP/1.1\r\n"
+    "Host:%s\r\n" "Connection: close\r\n\r\n";
   const char urlcontinuecheck[] =
-    "GET /sendsms.php?sent=cli&confirmation=on&msgid=%s HTTP/1.0\r\n\r\n";
+    "GET /sendsms.php?sent=cli&confirmation=on&msgid=%s HTTP/1.1\r\n"
+    "Host:%s\r\n" "Connection: close\r\n\r\n";
   char *buffer, *smsreq, *urltemplate, *out, *smsid = NULL, *smsstatus;
   int sd, flags = 0, i;
 
@@ -86,15 +88,17 @@ int sendsms (struct hostent *host, char *gsmnumber, char *gsmtext, int checksent
 
 
   memset (&addr, 0x0, sizeof (addr));
-  smsid=(char *)malloc(50);
-  memset(smsid,0x0,14);
-  for (i = 0; i < 10; i++) {
-	//printf("smsid=%s\n",smsid);
-	sd = socket (PF_INET, SOCK_STREAM, 0);
-	if (sd == -1) {
-		fprintf (stderr, "Cannot open socket\n");
-		exit (1);
-	}
+  smsid = (char *) malloc (50);
+  memset (smsid, 0x0, 14);
+  for (i = 0; i < 10; i++)
+    {
+      //printf("smsid=%s\n",smsid);
+      sd = socket (PF_INET, SOCK_STREAM, 0);
+      if (sd == -1)
+        {
+          fprintf (stderr, "Cannot open socket\n");
+          exit (1);
+        }
 #ifndef MINGW32
 #define SHUTDOWN(fd)    { shutdown((fd),0); close((fd)); }
       flags = fcntl (sd, F_GETFL, 0);
@@ -105,68 +109,81 @@ int sendsms (struct hostent *host, char *gsmnumber, char *gsmtext, int checksent
       flags = 0;
 #endif
 
-	fcntl (sd, F_SETFL, flags);
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons (port);
-	addr.sin_addr.s_addr = *((long *) host->h_addr_list[0]);
-	connect (sd, (struct sockaddr *) &addr, sizeof (struct sockaddr));
-	buffer = (char *) malloc (1023);
-	memset (buffer, 0x0, 1023);
-	//printf(smsid);
-	if(!(strncmp(smsid,"send_",5) == 0 )) {
-		if (checksent == 1){
-			urltemplate = (char *) malloc (strlen (urlconfirm));
-			memset (urltemplate, 0x0, strlen (urlconfirm));
-			strcpy (urltemplate, urlconfirm);
-		} else {
-			urltemplate = (char *) malloc (strlen (urlnoconfirm));
-			memset (urltemplate, 0x0, strlen (urlnoconfirm));
-			strcpy (urltemplate, urlnoconfirm);
-		}
-		smsreq = (char *) malloc (strlen (urltemplate) + 1023);
-		memset (smsreq, 0x0, strlen (urltemplate) + 1023);
-		sprintf (smsreq, urltemplate, gsmnumber, replace (gsmtext, " ", "+"));
-	} else {
-		urltemplate = (char *) malloc (strlen(urlcontinuecheck));
-		memset (urltemplate, 0x0, strlen (urlcontinuecheck));
-		strcpy (urltemplate, urlcontinuecheck);
-		smsreq = (char *) malloc (strlen (urltemplate) + 1023);
-		memset (smsreq, 0x0, strlen (urltemplate) + 1023);
-		
-		sprintf (smsreq, urltemplate, smsid);
-		//printf("check here...%s\n",smsreq);
-	}
-	if (send (sd, smsreq, strlen (smsreq), 0) != strlen (smsreq)){
-		printf ("sending failed...\n");
-		exit (-1);
-	}
-	//printf("smsreq=%s\n",smsreq);
-	out = (char *) malloc (1024);
-	memset (out, 0x0, 1024);
-	recv (sd, out, 1024, 0);
-	SHUTDOWN (sd); // close socket...
-	smsstatus = strstr(out, "SMSSTATUS: ");
-	//printf("%s\n",smsstatus);
-	char *tmp;
-	if((tmp = (char *) strchr(smsstatus,'#')) != NULL) {
-		smsid = strdup(tmp+1);
-	}
-	free (buffer);
-	free (urltemplate);
-	free (smsreq);
-	free (out);
-	if(!checksent) exit(0);
-	if(strstr(smsstatus,"SENT")) {
-		printf("%s\n",smsstatus);
-		exit(0);
-	}
-	if(strstr(smsstatus,"FAILED")) { 
-		printf("%s\n",smsstatus);
-		exit(-1);
-	}
-	sleep(5);
-}
-  printf("SMSSTATUS: POSSIBLE FAIL (TIMEOUT)\n");
+      fcntl (sd, F_SETFL, flags);
+      addr.sin_family = AF_INET;
+      addr.sin_port = htons (port);
+      addr.sin_addr.s_addr = *((long *) host->h_addr_list[0]);
+      connect (sd, (struct sockaddr *) &addr, sizeof (struct sockaddr));
+      buffer = (char *) malloc (1023);
+      memset (buffer, 0x0, 1023);
+      if (!(strncmp (smsid, "send_", 5) == 0))
+        {
+          if (checksent == 1)
+            {
+              urltemplate = (char *) malloc (strlen (urlconfirm));
+              memset (urltemplate, 0x0, strlen (urlconfirm));
+              strcpy (urltemplate, urlconfirm);
+            }
+          else
+            {
+              urltemplate = (char *) malloc (strlen (urlnoconfirm));
+              memset (urltemplate, 0x0, strlen (urlnoconfirm));
+              strcpy (urltemplate, urlnoconfirm);
+            }
+          smsreq = (char *) malloc (strlen (urltemplate) + 1023);
+          memset (smsreq, 0x0, strlen (urltemplate) + 1023);
+          sprintf (smsreq, urltemplate, gsmnumber,
+                   replace (gsmtext, " ", "+"), host);
+        }
+      else
+        {
+          urltemplate = (char *) malloc (strlen (urlcontinuecheck));
+          memset (urltemplate, 0x0, strlen (urlcontinuecheck));
+          strcpy (urltemplate, urlcontinuecheck);
+          smsreq = (char *) malloc (strlen (urltemplate) + 1023);
+          memset (smsreq, 0x0, strlen (urltemplate) + 1023);
+
+          sprintf (smsreq, urltemplate, smsid, host);
+        }
+      if (send (sd, smsreq, strlen (smsreq), 0) != strlen (smsreq))
+        {
+          printf ("SMSSTATUS: FAILED in send()\n");
+          exit (-1);
+        }
+      out = (char *) malloc (1024);
+      memset (out, 0x0, 1024);
+      recv (sd, out, 1024, 0);
+      SHUTDOWN (sd);            // close socket...
+      smsstatus = strstr (out, "SMSSTATUS: ");
+      if (strstr (out, "HTTP/1.1 200") == NULL)
+        {
+          printf ("SMSSTATUS: FAILED SERVER NOT CONFIGURED\n");
+          exit (-1);
+        }
+      char *tmp;
+      if ((tmp = (char *) strchr (smsstatus, '#')) != NULL)
+        {
+          smsid = strdup (tmp + 1);
+        }
+      free (buffer);
+      free (urltemplate);
+      free (smsreq);
+      free (out);
+      if (!checksent)
+        exit (0);
+      if (strstr (smsstatus, "SENT"))
+        {
+          printf ("%s\n", smsstatus);
+          exit (0);
+        }
+      if (strstr (smsstatus, "FAILED"))
+        {
+          printf ("%s\n", smsstatus);
+          exit (-1);
+        }
+      sleep (5);
+    }
+  printf ("SMSSTATUS: POSSIBLE FAIL (TIMEOUT)\n");
   return 1;
 }
 
@@ -197,34 +214,34 @@ main (int argc, char *argv[])
     switch (c)
       {
       case 'c':
-	checksent = 1;
-	break;
+        checksent = 1;
+        break;
       case 's':
-	serveraddr = optarg;
-	break;
+        serveraddr = optarg;
+        break;
       case 'b':
-	gsmnumber = optarg;
-	break;
+        gsmnumber = optarg;
+        break;
       case 't':
-	gsmtext = optarg;
-	break;
+        gsmtext = optarg;
+        break;
       case 'p':
-	port = atoi (optarg);
-	break;
+        port = atoi (optarg);
+        break;
       case '?':
-	if (optopt == 's' || optopt == 'b' || optopt == 't')
-	  fprintf (stderr, "Option -%c requires an argument.\n", optopt);
-	else if (isprint (optopt))
-	  fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-	else
-	  fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
-	return 1;
+        if (optopt == 's' || optopt == 'b' || optopt == 't')
+          fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+        else if (isprint (optopt))
+          fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+        else
+          fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
+        return 1;
       case 'h':
-	usage (argv[0]);
-	exit (0);
-	break;
+        usage (argv[0]);
+        exit (0);
+        break;
       default:
-	abort ();
+        abort ();
       }
 
   if (strlen (serveraddr) == 0)
@@ -246,7 +263,7 @@ main (int argc, char *argv[])
   if (err == 1)
     {
       printf ("Errors detected:\n%s\nType \"%s -h\" for help\n", errstr,
-	      argv[0]);
+              argv[0]);
     }
 
   if (checksent == 1)

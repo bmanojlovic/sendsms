@@ -3,8 +3,8 @@ CC=gcc -Wall -g
 AIX_CC=gxlc -g
 AIX_STRIP=strip
 STRIP=strip -s
-WIN_GCC=i386-mingw32msvc-gcc -Wall -g
-WIN_STRIP=i386-mingw32msvc-strip -s
+WIN_GCC=i686-w64-mingw32-gcc -Wall -g
+WIN_STRIP=/usr/bin/i686-w64-mingw32-strip -s
 TARGET=sendsms
 OBJECT=sendsms.o
 SOURCE=sendsms.c
@@ -20,11 +20,12 @@ aix:
 lin: 
 	${CC} -c ${SOURCE} -o ${OBJECT}
 	${CC} ${LIBS} -o ${TARGET} ${OBJECT}
-	${STRIP} ${TARGET}
+#	${STRIP} ${TARGET}
+
 win:
 	${WIN_GCC} -DMINGW32 ${WINICLUDES} -c ${SOURCE} -o ${OBJECT}
 	${WIN_GCC} -DMINGW32 -o ${TARGET}.exe ${OBJECT} ${WINLIBS}
-	${WIN_STRIP} ${TARGET}.exe
+#	${WIN_STRIP} ${TARGET}.exe
 
 clean:
 	rm -f ${TARGET}

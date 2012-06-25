@@ -18,9 +18,16 @@ if(isset($sent)) {
     if ($text == '') { $errcond = true; $errdesc .= 'Text missing... ';}
 
     if(!$errcond) {
-      $tmpfname = tempnam('/var/spool/sms/outgoing', 'send_');
-    
-      $fp = fopen($tmpfname, "w");
+      $tempdir = '/var/spool/sms/outgoing';
+      $tmpfname = tempnam($tempdir, 'send_');
+      /* tempnam is dumb and creates temp file in /tmp/ if it fails to create it in desired directory for some reason */
+      if( dirname($tmpfname)!=$tempdir ) {
+        die('SMSSTATUS: tempnam failed to create tmpfile in '.$tempdir);
+      }
+      
+      if(($fp = fopen($tmpfname, "w")) === FALSE) {
+        die('SMSSTATUS: Failed to open file for writing');
+      }
       fwrite($fp, "To: $to\n" );
       fwrite($fp, "From: " . $_SERVER['REMOTE_ADDR'] . "\n\n");
       fwrite($fp, str_replace ('%%',"\n",$text ));

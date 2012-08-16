@@ -246,7 +246,7 @@ main (int argc, char *argv[])
 
   if (strlen (serveraddr) == 0)
     {
-      strcat (errstr, "Server address must specified\n");
+      strcat (errstr, "Server address must be specified\n");
       err = 1;
     }
   if (strlen (gsmnumber) == 0)

@@ -264,6 +264,7 @@ main (int argc, char *argv[])
     {
       printf ("Errors detected:\n%s\nType \"%s -h\" for help\n", errstr,
               argv[0]);
+      exit(-1);
     }
 
   if (checksent == 1)

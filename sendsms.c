@@ -1,3 +1,13 @@
+/*!
+ * sendsms
+ * https://github.com/bmanojlovic/sendsms/
+ *
+ * Copyright (c) 2015 Boris Manojlovic
+ * http://steki.net
+ *
+ * Licensed under http://opensource.org/licenses/MIT
+ */
+
 #include <stdio.h>
 #include <unistd.h>
 #include <ctype.h>

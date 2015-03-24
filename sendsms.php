@@ -1,5 +1,16 @@
 <?php
 
+/*!
+ * sendsms
+ * https://github.com/bmanojlovic/sendsms/
+ *
+ * Copyright (c) 2015 Boris Manojlovic
+ * http://steki.net
+ *
+ * Licensed under http://opensource.org/licenses/MIT
+ */
+
+
 if(isset($_REQUEST['to'])) $to = $_REQUEST['to']; else unset ($to);
 if(isset($_REQUEST['text'])) $text = $_REQUEST['text']; else unset ($text);
 if(isset($_REQUEST['msgid'])) $msgid = $_REQUEST['msgid']; else unset ($msgid);

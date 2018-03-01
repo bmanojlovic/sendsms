@@ -60,12 +60,11 @@ cov:
 build: vendor
 	go build \
 		$(BUILD_FLAGS) \
-		-o $(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)
-	ln -sf $(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH) $(NAME)
+		-o $(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)$(shell go env GOEXE)
+	ln -sf $(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)$(shell go env GOEXE) $(NAME)$(shell go env GOEXE)
 
 xc:
 	GOOS=linux GOARCH=amd64 make build
-	GOOS=windows GOARCH=amd64 make build
 
 install: test
 	go install \

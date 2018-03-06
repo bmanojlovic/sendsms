@@ -12,12 +12,24 @@
 
 ## usage
 
-     sendsms -s <SERVER IP ADDRESS> -p <PORT NUMBER> -b <GSM NUMBER TO> -t "<TEXT TO BE SENT>" -c [sending check]
+    bmanojlovic@pc:~> sendsms --help
+    sending sms from command line trough smstools3 server implementation
+
+    Usage:
+      sendsms [flags]
+
+    Flags:
+      -c, --checksentstatus         verbose output
+      -h, --help                    help for sendsms
+      -t, --messagetext string      
+      -p, --port string             Port Number (default "80")
+      -b, --receivernumber string   Receiver number
+      -s, --servername string       Server hosting smstools
 
 ## Example
 
-     sendsms -s 10.11.10.20 -p 80 -b 11111222333 -t "orao pao" -c       // this way if you need confirmation from modem (not network!!!)
-     sendsms -s 10.11.10.20 -p 80 -b 11111222333 -t "orao pao"          // no confirmation
+    sendsms -s 10.11.10.20 -p 80 -b 11111222333 -t "orao pao" -c       // this way if you need confirmation from modem (not network!!!)
+    sendsms -s 10.11.10.20 -p 80 -b 11111222333 -t "orao pao"          // no confirmation
 
 ## Program output
 
@@ -34,7 +46,7 @@
 
 ## Web Server setup:
 
- Put sendsms.php into server root so it can be reached from sendsms binary with /sendsms.php url
+ Put php/sendsms.php into server document root so it can be reached from sendsms binary with /sendsms.php url
 
 ## Sanity check if web server part is configured correctly is:
 

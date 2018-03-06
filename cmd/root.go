@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -34,13 +33,10 @@ func init() {
 var rootCmd = &cobra.Command{
 	Use:   "sendsms",
 	Short: "sending sms from command line trough smstools3 server implementation",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return errors.New("requires at least one arg")
-		}
-		return nil
-	},
 	Run: func(cmd *cobra.Command, args []string) {
+		if cmd.HasFlags() == false {
+			cmd.HelpFunc()
+		}
 		if len(messageText) == 0 {
 			log.Fatal("Text to send is mandatory")
 		} else if len(receiverNumber) == 0 {
@@ -48,7 +44,6 @@ var rootCmd = &cobra.Command{
 		} else if len(serverName) == 0 {
 			log.Fatal("Servername is mandatory")
 		}
-		// }
 		var netClient = &http.Client{
 			Timeout: time.Second * 10,
 		}

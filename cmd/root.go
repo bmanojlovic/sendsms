@@ -24,6 +24,10 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&receiverNumber, "receivernumber", "b", "", "Receiver number")
 	// rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&checkSentStatus, "checksentstatus", "c", false, "verbose output")
+	// setting flags with MarkPersistentFlagRequired makes easier handling or error conditions
+	rootCmd.MarkPersistentFlagRequired("messagetext")
+	rootCmd.MarkPersistentFlagRequired("servername")
+	rootCmd.MarkPersistentFlagRequired("receivernumber")
 }
 
 // func initConfig() {
@@ -34,16 +38,6 @@ var rootCmd = &cobra.Command{
 	Use:   "sendsms",
 	Short: "sending sms from command line trough smstools3 server implementation",
 	Run: func(cmd *cobra.Command, args []string) {
-		if cmd.HasFlags() == false {
-			cmd.HelpFunc()
-		}
-		if len(messageText) == 0 {
-			log.Fatal("Text to send is mandatory")
-		} else if len(receiverNumber) == 0 {
-			log.Fatal("receivernumber is mandatory")
-		} else if len(serverName) == 0 {
-			log.Fatal("Servername is mandatory")
-		}
 		var netClient = &http.Client{
 			Timeout: time.Second * 10,
 		}
